@@ -2,14 +2,15 @@
 	/**
 	* 
 	*/
-	class DB {
-		
+	class BD {
+		private static $conn; 
+
 		public function __construct(){}
-		public static function Conn(){
-			if (is_null(self::$Conn)){
-				self::$Conn = new PDO('mysql:host='.HOST.';dbname='.DB.'',''.USER.'',''.PASS.'');
+		public static function conn(){
+			if (is_null(self::$conn)){
+				self::$conn = new PDO('mysql:host='.HOST.';dbname='.DATABASE.'',''.USER.'',''.PASS.'');
 			}
-		return self::Conn;
+		return self::$conn;
 		}
 	}
 ?>

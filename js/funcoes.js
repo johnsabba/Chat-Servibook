@@ -1,4 +1,16 @@
 jQuery(function(){
+	var clicou = [];
+	var userOnline = Number(jQuery('span.user_online').attr('id'));
+	
+	function in_array(valor, array){
+		for (var i = 0; i < array.length; i++) {
+			if(array[i]==valor){
+				return true;
+			}
+		}
+	return false;	
+	}
+
 
 	function add_janela(id, nome, status){
 
@@ -17,6 +29,34 @@ jQuery(function(){
 
 		jQuery('#chats').append(janela);
 	}
+	function retorna_historico(id_conversa){
+		jQuery.ajax({
+			type: 'POST',
+			url: 'sys/historico.php',
+			data:{conversacom: id_conversa, online: userOnline},
+			dataType: 'json',
+			success: function(retorno){
+				jQuery.each(retorno, function(i, msg){
+					if (jQuery('#janela_'+msg.janela_de).length > 0) {
+						if (userOnline == msg.id_de) {
+							jQuery('#janela_'+msg.janela_de+' .mensagens ul').append('<li id="'+msg.id+'" class="eu"><p>'+msg.mensagens+'</p></li>');
+							
+						} else {
+							jQuery('#janela_'+msg.janela_de+' .mensagens ul').append('<li id="'+msg.id+'" ><div class="imgSmall"><img src="images/'+msg.fotoUser+'"/></div><p>'+msg.mensagens+'</p></li>');
+						}					
+						
+					}
+
+				});
+				[].reverse.call(jQuery('#janela_'+id_conversa+' .mensagens li')).appendTo(jQuery('#janela_'+id_conversa+' .mensagens ul'));
+				var altura = jQuery('#janela_'+id_conversa+' .mensagens').height();
+				jQuery('#janela_'+id_conversa+' .mensagens').animate({scrollTop: altura}, '500');
+
+			}
+
+		});
+
+	}
 
 	jQuery('body').on('click', '#users_online a', function(){
 		var id =jQuery(this).attr('id');
@@ -25,10 +65,10 @@ jQuery(function(){
 		var status = jQuery(this).next().attr('class');
 		var splitIds = id.split(':');
 		var idJanela = Number(splitIds[1]);
-		if (jQuery('#janela'+idJanela).length == 0) {
+		if (jQuery('#janela_'+idJanela).length == 0){
 			var nome = jQuery(this).text();
 			add_janela(id, nome, status);
-		
+			retorna_historico(idJanela);
 		}else{
 			jQuery(this).removeClass('comecar');
 		}
@@ -56,4 +96,79 @@ jQuery(function(){
 		jQuery("#users_online li#"+idJanelaFechada+' a').addClass('comecar');
 	});
 
-});	
+	jQuery('body').on('keyup', '.msg', function(e){
+		if(e.which == 13){
+			var texto = jQuery(this).val();
+			var id = jQuery(this).attr('id');
+			var split= id.split(':');
+			var para = Number(split[1]);
+			jQuery.ajax({
+				type: 'POST',
+				url: 'sys/submit.php',
+				data:{mensagem: texto, de: userOnline, para: para},
+				success: function(retorno) {
+					if (retorno == 'ok'){
+						jQuery('.msg').val('');
+						
+					}else{
+						alert("Ocorreu um erro ao eviar a mensagem");
+						 
+					}
+				}
+			});
+		}	
+	});
+
+	function verifica(timestamp, lastid, user){
+		var t;
+		jQuery.ajax({
+			url: 'sys/stream.php',
+			type:'GET',
+			data: 'timestamp='+timestamp+'&lastid='+lastid+'&user='+user,
+			dataType: 'json',
+			success: function(retorno){
+				clearInterval(t);
+				if (retorno.status == 'resultados' ||  retorno.status == 'vazio'){
+					t = setTimeout(function(){
+						verifica(retorno.timestamp, retorno.lastid, userOnline);
+					},1000);
+				
+				if (retorno.status == 'resultados'){
+					jQuery.each(retorno.dados, function(i,msg){
+						if (jQuery('#janela_'+msg.janela_de).length==0){ //check se ja ta aberta
+							//abre janela
+							jQuery('#users_online #'+msg.janela_de+' .comecar').click();
+							clicou.push(msg.janela_de);
+						}
+
+						if (!in_array(msg.janela_de, clicou)){
+							if(userOnline == msg.id_de){	
+								if(jQuery('.mensagens ul li#'+msg.id).length == 0 && msg.janela_de >0){
+									jQuery('#janela_'+msg.janela_de+' .mensagens ul').append('<li class="eu" id="'+msg.id+'"><p>'+msg.mensagens+'</p></li>');
+								}else{
+									jQuery('#janela_'+msg.janela_de+' .mensagens ul').append('<li id="'+msg.id+'" ><div class="imgSmall"><img src="images/'+msg.fotoUser+'"/></div><p>'+msg.mensagens+'</p></li>');
+								}
+							}
+						}	
+					});	
+					var altura = jQuery('.mensagens').height();
+					jQuery('.mensagens').animate({scrollTop:altura}, 500);
+				}
+				}else if (retorno.status == 'erro'){
+					alert('Ficamos confusos, atualize a pagia');
+				}	
+			},
+				error: function(){
+				clearInterval(t);
+				t = setTimeout(function(){
+				verifica(retorno.timestamp, retorno.lastid, userOnline);
+				},15000);
+				
+			}
+		
+		});
+	}
+	verifica(0,0,userOnline);
+	console.log(clicou);
+
+});

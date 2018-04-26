@@ -125,19 +125,20 @@ ul{list-style-type:none;}
 .mensagens ul li{
 	float: right;
 	width: 80%;
-	background:linear-gradient(to bottom: #fff, #ccc 130%);
-	border:1px solid #999;
+	background: linear-gradient(to bottom, #fff, #ccc 130%);
+	border: 1px solid #999;
 	border-radius: 4px;
 	position: relative;	
 	padding: 4px;
 	margin-bottom: 7px;
 }
 
-.mensagens ul li.imgSmall {
+.mensagens ul li .imgSmall{
 	position: absolute;
 	width: 35px;
 	height: 35px;
 	left: -45px;
+	margin-top: -9px;
 
 }
 .mensagens ul li p{

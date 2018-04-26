@@ -1,3 +1,22 @@
+<?php
+	session_start();
+	include_once 'defines.php';
+	require_once ('class/BD.class.php');
+	BD::conn();
+	if(!isset($_SESSION['email_logado'],$_SESSION['id_user'])){
+		header("location: index.php");
+	}
+	$pegaUser = BD::conn()->prepare("SELECT * FROM `user` WHERE `email` = ?" );
+	//$pegaUser = BD::conn()->prepare("SELECT * FROM 'user' WHERE 'email' = ?" );
+	$pegaUser->execute(array($_SESSION['email_logado']));
+	$dadosUser = $pegaUser->fetch();
+	if(isset($_GET['acao'] )&& $_GET['acao'] == 'sair'){
+		unset($_SESSION['email_logado']);
+		unset($_SESSION['id_user']);
+		session_destroy();
+		header("location: index.php");
+	}
+?>
 <!DOCTYPE HTML>
 <html lang="pt-BR">
 <head>
@@ -11,15 +30,31 @@
 	
 </head>
 <body>
+	<span class="user_online" id="<?php echo $dadosUser['id'];?>"></span> 
+	<h2>Bem vindo <?php echo utf8_decode($dadosUser['nome']);?></h2>
+	<a href='?acao=sair'>SAIR</a>
 	<aside id="users_online">
 		<ul>
-		<?php for ($i=1; $i <=8 ; $i++):?>  
-			<li id="5">
-				<div class="imgSmall"><img src="images/logo.png" border="0"/></div>
-				<a href="#" id="3:" class="comecar">Usuário_X</a>
-				<span id="5" class="status on"></span>
+		<?php 
+			$pegaUsuarios = BD::conn()->prepare("SELECT * FROM `user` WHERE `id` != ?");
+			$pegaUsuarios->execute(array($_SESSION['id_user']));
+			while($row = $pegaUsuarios->fetch()){
+				$foto = ($row['foto']== '') ? 'default.png' : $row['foto']; 
+				$blocks = explode(',', $row['blocks']);
+				$agora = date('Y-m-d H:i:s');
+				if(!in_array($_SESSION['id_user'], $blocks)){
+					$status = 'on';
+					if($agora >= $row['limite']){
+						$status = 'off';
+					}
+			
+		?>  
+			<li id="<?php echo $row['id']; ?>">
+				<div class="imgSmall"><img src="images/<?php echo $foto;?>" border="0"/></div>
+				<a href="#" id="<?php echo $_SESSION['id_user'].':'.$row['id'];?>" class="comecar"><?php echo utf8_decode($row['nome']);?></a>
+				<span id="<?php echo $row['id']; ?>" class="<?php echo 'status '.$status;?>"></span>
 			</li>
-		<?php endfor;?> 	
+		<?php }}?> 	
 		</ul>
 	</aside>
 

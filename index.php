@@ -1,3 +1,11 @@
+<?php
+	session_start();
+	include_once 'defines.php';
+	require_once ('class/BD.class.php');
+	BD::conn();
+
+?>
+
 <!DOCTYPE HTML>
 <html lang="pt-BR">
 <head>
@@ -65,11 +73,42 @@
 	<body>
 		<div class="formulario">
 			<h1> Bem vindo ao chat, faça login</h1>
+			<?php
+				if(isset($_POST['acao']) && $_POST['acao'] == 'logar'){
+					$email = strip_tags(trim(filter_input(INPUT_POST, 'email', FILTER_SANITIZE_STRING)));
+					if($email == ''){
+						echo 'Informe seu email';
+					}else{
+						$pegaUser = BD::conn()->prepare("SELECT * FROM `user` WHERE `email` = ?" );
+						//$pegaUser = BD::conn()->prepare("SELECT * FROM 'user' WHERE 'email' = ?" );
+						$pegaUser->execute(array($email));
+						if($pegaUser->rowCount() == 0){
+							echo $pegaUser->rowCount();
+							echo 'Não encontramos esse login';
+						}else{
+							$agora = date('Y-m-d H:i:s');
+							$limite = date('Y-m-d H:i:s', strtotime('+2 min'));
+							$update = BD::conn()->prepare("UPDATE `user` SET `horario` = ?, `limite` = ? WHERE `email` = ? ");
+							if( $update -> execute(array($agora, $limite, $email)) ){ 
+								while($row = $pegaUser->fetchObject()){
+									$_SESSION['email_logado'] = $email;
+									$_SESSION['id_user'] = $row->id;
+									header("Location: chat.php");
+									//echo '<script>location.href="chat.php"</script>';
+									
+								}
+							}//se atualizou
+						}
+					}
+				}
+			
+			?>
 			<form action="" method="post" enctype="multipart/form-data">
 				<label>
 					<span>Informe seu Email</span>
 					<input type="text" name="email" placeholder="Seu Email aqui."/>
-				</label>	
+				</label>
+				<input type="hidden" name="acao" value="logar"/>	
 				<input type="submit" value="Entrar" class="botao right" />
 			</form>
 		</div>

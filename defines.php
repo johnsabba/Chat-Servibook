@@ -1,6 +1,6 @@
 <?php
 	define('HOST', 'localhost');
-	define('DB', '');
+	define('DATABASE', 'servibook_chat');
 	define('USER', 'root');
 	define('PASS', '');	
 
