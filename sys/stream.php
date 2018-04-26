@@ -14,7 +14,7 @@ if (isset($_POST['conversacom'])) {
     $tempoGasto = 0;
     $lastidQuery = '';
 
-    if (empty(lastid)) {
+    if (empty($lastid)) {
         $lastidQuery = 'AND `id` >'.$lastid;
     }
 
@@ -50,7 +50,7 @@ if (isset($_POST['conversacom'])) {
             $janela_de = 0;
             if($userOnline == $row['id_de']){
                 $janela_de = $row['id_para'];
-            }elseif ($userOnline==$row['id_para']) {
+            }elseif ($userOnline == $row['id_para']) {
                 $janela_de = $row['id_de'];
                 $pegaUsr = BD::conn()->prepara("SELECT `foto`FROM `user` WHERE `id` = '$row[id_de]'");
                 $pegaUsr->execute();
@@ -62,7 +62,7 @@ if (isset($_POST['conversacom'])) {
             $msg = $row['mensagens'];
             $novasMensagens[] = array(
                 'id' => $row['id'],
-                'mensagem' => utf8_decode($msg),
+                'mensagens' => utf8_decode($msg),
                 'foto' => $fotoUser,
                 'id_de' => $row['id_de'],
                 'id_para' => $row['id_para'],

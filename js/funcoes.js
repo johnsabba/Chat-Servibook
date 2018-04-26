@@ -142,33 +142,32 @@ jQuery(function(){
 						}
 
 						if (!in_array(msg.janela_de, clicou)){
-							if(userOnline == msg.id_de){	
-								if(jQuery('.mensagens ul li#'+msg.id).length == 0 && msg.janela_de >0){
+							if(jQuery('.mensagens ul li#'+msg.id).length == 0 && msg.janela_de >0){
+								if(userOnline == msg.id_de){	
 									jQuery('#janela_'+msg.janela_de+' .mensagens ul').append('<li class="eu" id="'+msg.id+'"><p>'+msg.mensagens+'</p></li>');
 								}else{
-									jQuery('#janela_'+msg.janela_de+' .mensagens ul').append('<li id="'+msg.id+'" ><div class="imgSmall"><img src="images/'+msg.fotoUser+'"/></div><p>'+msg.mensagens+'</p></li>');
+									jQuery('#janela_'+msg.janela_de+' .mensagens ul').append('<li id="'+msg.id+'" ><div class="imgSmall"><img src="images/'+msg.fotoUser+'" border ="0"/></div><p>'+msg.mensagens+'</p></li>');
 								}
 							}
 						}	
 					});	
 					var altura = jQuery('.mensagens').height();
 					jQuery('.mensagens').animate({scrollTop:altura}, 500);
+					console.log(clicou);
 				}
 				}else if (retorno.status == 'erro'){
-					alert('Ficamos confusos, atualize a pagia');
+					alert('Ficamos confusos, atualize a pagina');
 				}	
 			},
-				error: function(){
-				clearInterval(t);
-				t = setTimeout(function(){
-				verifica(retorno.timestamp, retorno.lastid, userOnline);
-				},15000);
+			error: function(){
+			clearInterval(t);
+			t=setTimeout(function(){
+			verifica(retorno.timestamp, retorno.lastid, userOnline);
+			},15000);
 				
-			}
+			}	
 		
 		});
 	}
 	verifica(0,0,userOnline);
-	console.log(clicou);
-
 });

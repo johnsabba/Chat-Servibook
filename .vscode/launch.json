@@ -10,7 +10,7 @@
             "request": "launch",
             "name": "Launch Chrome against localhost",
             "url": "http://localhost:80",
-            "webRoot": "${/Chat-Servibook/}"
+            "webRoot": "${/Chat-Servibook/index.php}"
         }
     ]
 }
